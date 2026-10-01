@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nature &amp; Moi — Découvrez la faune de Belgique</title>
+    <meta name="description"
+        content="Prenez un animal en photo : Nature & Moi vous aide à l'identifier et à en apprendre plus sur la faune de Belgique.">
+    <meta name="theme-color" content="#2f5d3a">
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 20C4 9 10 3 21 3c0 11-6 17-17 17z' fill='%232f5d3a'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js" defer></script>
+    <script src="https://unpkg.com/topojson-client@3" defer></script>
+    <script type="module" src="js/app.js"></script>
+</head>
+
+<body>
+    <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+
+    <header class="entete">
+        <a class="logo" href="#accueil">
+            <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
+                <path d="M4 20C4 9 10 3 21 3c0 11-6 17-17 17z" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linejoin="round" />
+                <path d="M4 20 15 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+            <span>Nature &amp; Moi</span>
+        </a>
+        <nav class="nav" aria-label="Navigation principale">
+            <ul>
+                <li><a href="#accueil" data-nav="accueil">Accueil</a></li>
+                <li><a href="#explorer" data-nav="explorer">Explorer</a></li>
+                <li><a href="#favoris" data-nav="favoris">Favoris</a></li>
+                <li><a href="#accessibilite" data-nav="accessibilite">Accessibilité</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Annonces vocales pour les lecteurs d'écran -->
+    <p id="annonces" class="sr-only" role="status" aria-live="polite"></p>
+
+    <main id="contenu">
+
+        <!-- ===== ACCUEIL ===== -->
+        <section id="vue-accueil" class="vue" aria-labelledby="titre-accueil">
+            <div class="hero">
+                <h1 id="titre-accueil" tabindex="-1">Un animal croisé sur votre chemin ?</h1>
+                <p>Prenez une photo : nous essayons de l'identifier et vous apprenons à mieux le connaître.</p>
+                <div class="actions">
+                    <input type="file" id="photo-camera" class="sr-input" accept="image/*" capture="environment">
+                    <label for="photo-camera" class="btn">Prendre une photo</label>
+                    <input type="file" id="photo-import" class="sr-input" accept="image/*">
+                    <label for="photo-import" class="btn btn-clair">Importer une image</label>
+                </div>
+                <p class="note">Votre photo reste sur votre appareil : elle n'est envoyée nulle part.</p>
+            </div>
+
+            <p id="erreur" class="message erreur" role="alert" hidden></p>
+
+            <div id="analyse" class="bloc" hidden>
+                <h2>Analyse de l'image</h2>
+                <img id="apercu" class="apercu" alt="Votre photo">
+                <p id="statut">Préparation…</p>
+                <progress id="progression" max="100" aria-label="Progression de l'analyse"></progress>
+            </div>
+
+            <div id="resultat" class="bloc" hidden>
+                <h2>Résultat</h2>
+                <div id="resultat-contenu"></div>
+            </div>
+
+            <h2>Explorer par catégorie</h2>
+            <ul class="categories">
+                <li><a href="#explorer/mammiferes">Mammifères</a></li>
+                <li><a href="#explorer/oiseaux">Oiseaux</a></li>
+                <li><a href="#explorer/insectes">Insectes et arachnides</a></li>
+                <li><a href="#explorer/reptiles">Amphibiens et reptiles</a></li>
+                <li><a href="#explorer/poissons">Poissons</a></li>
+                <li><a href="#explorer" class="tous">Tous les animaux</a></li>
+            </ul>
+        </section>
+
+        <!-- ===== EXPLORER ===== -->
+        <section id="vue-explorer" class="vue" aria-labelledby="titre-explorer" hidden>
+            <h1 id="titre-explorer" tabindex="-1">Explorer les animaux</h1>
+            <div class="recherche">
+                <label for="recherche">Rechercher un animal</label>
+                <input type="search" id="recherche" placeholder="Ex. : renard, héron…" autocomplete="off">
+            </div>
+            <div id="filtres" class="filtres" role="group" aria-label="Filtrer par catégorie"></div>
+            <p id="compteur" class="note"></p>
+            <ul id="liste" class="cartes"></ul>
+        </section>
+
+        <!-- ===== FICHE ANIMAL ===== -->
+        <section id="vue-animal" class="vue" aria-label="Fiche de l'animal" hidden>
+            <a href="#explorer" class="retour">Retour à la liste</a>
+            <article id="fiche" class="fiche"></article>
+        </section>
+
+        <!-- ===== FAVORIS ===== -->
+        <section id="vue-favoris" class="vue" aria-labelledby="titre-favoris" hidden>
+            <h1 id="titre-favoris" tabindex="-1">Mes favoris</h1>
+            <p id="favoris-vide" class="message" hidden>Aucun favori pour l'instant. Ouvrez la fiche d'un animal et
+                choisissez « Ajouter aux favoris ».</p>
+            <ul id="liste-favoris" class="cartes"></ul>
+        </section>
+
+        <!-- ===== ACCESSIBILITÉ ===== -->
+        <section id="vue-accessibilite" class="vue" aria-labelledby="titre-accessibilite" hidden>
+            <h1 id="titre-accessibilite" tabindex="-1">Accessibilité</h1>
+            <p>Réglez le site selon vos besoins. Vos choix sont mémorisés sur cet appareil.</p>
+            <div class="reglages">
+                <div class="reglage">
+                    <span id="lib-taille">Taille du texte</span>
+                    <div class="taille" role="group" aria-labelledby="lib-taille">
+                        <button type="button" id="taille-moins" class="btn btn-clair"
+                            aria-label="Diminuer la taille du texte">A−</button>
+                        <output id="taille-valeur" for="taille-moins taille-plus">Normale</output>
+                        <button type="button" id="taille-plus" class="btn btn-clair"
+                            aria-label="Augmenter la taille du texte">A+</button>
+                    </div>
+                </div>
+                <div class="reglage">
+                    <label for="contraste">Contraste renforcé</label>
+                    <input type="checkbox" id="contraste" role="switch">
+                </div>
+                <div class="reglage">
+                    <label for="animations">Réduire les animations</label>
+                    <input type="checkbox" id="animations" role="switch">
+                </div>
+            </div>
+            <button type="button" id="reinitialiser" class="btn btn-clair">Rétablir les réglages d'origine</button>
+
+            <h2>Utiliser le site autrement</h2>
+            <ul class="aide">
+                <li><strong>Au clavier :</strong> Tab pour avancer, Maj + Tab pour reculer, Entrée ou Espace pour
+                    activer.</li>
+                <li><strong>Lecteur d'écran :</strong> le site est structuré par titres et les résultats sont annoncés à
+                    voix haute.</li>
+                <li><strong>Animations :</strong> le site respecte aussi le réglage « réduire les animations » de votre
+                    appareil.</li>
+                <li><strong>Une difficulté ?</strong> Cette version est un prototype scolaire : tout retour est utile.
+                </li>
+            </ul>
+        </section>
+
+    </main>
+
+    <footer class="pied">
+        <p>Nature &amp; Moi — Observer · Identifier · Comprendre. Projet d'étudiante en web design. L'identification est
+            une suggestion et peut se tromper.</p>
+    </footer>
+</body>
+
+</html>
